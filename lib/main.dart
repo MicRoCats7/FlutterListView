@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:listviewflutter/listview.dart';
+import 'package:listviewflutter/tabbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,9 +24,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.green,
       ),
-      home: const listview(),
+      home: const tabBar(),
     );
   }
 }

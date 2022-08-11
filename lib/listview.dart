@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:listviewflutter/NameModel.dart';
+import 'package:listviewflutter/tabbar.dart';
 
 
 class listview extends StatefulWidget {
@@ -35,7 +36,7 @@ class _listviewState extends State<listview> {
   Widget avatar(int index){
     return CircleAvatar(
       radius: 24,
-      backgroundColor: Colors.yellow,
+      backgroundColor: Colors.green,
       child: Text(
         data[index].kodeName.toString(),
         style: TextStyle(color: Colors.white),
@@ -66,19 +67,27 @@ class _listviewState extends State<listview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Listview"),),
+      // appBar: AppBar(title: Text("Listview"),),
       body: ListView.builder(
         padding: EdgeInsets.all(5),
         itemCount: data.length,
         itemBuilder: (buildContext, index) {
           return GestureDetector(
-            onTap: (){
-              //snackbar
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("${data[index].name}"),
-                duration: Duration(seconds: 2),
-              ));
-            },
+            onLongPress: () => showDialog(context: context, builder: (BuildContext context) => AlertDialog(
+              title: Text("Hapus Kontak ini?"),
+              content: Text("Anda Yakin ingin menghapus kontak ${data[index].name} ?"),
+              actions: <Widget>[
+                TextButton(onPressed: (){
+                  Navigator.pop(context);
+                }, child: Text("Cancel")),
+                TextButton(onPressed: (){
+                  setState((){
+                    data.removeAt(index);
+                  });
+                  Navigator.pop(context);
+                }, child: Text("Yes"))
+              ],
+            )),
             child: Container(
               margin: EdgeInsets.all(10),
               child: Row(
