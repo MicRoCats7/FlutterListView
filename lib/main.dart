@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:listviewflutter/ListAllFootball.dart';
-import 'package:listviewflutter/listview.dart';
-import 'package:listviewflutter/tabbar.dart';
+import 'package:listviewflutter/SplashScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Premiere league',
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
         // This is the theme of your application.
@@ -29,7 +28,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.grey,
       ),
-      home: const ListAllFootbal(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart'as http;
+import 'package:listviewflutter/ClubList.dart';
 import 'package:listviewflutter/DetailFootBall.dart';
 import 'package:listviewflutter/PremiereLeagueModel.dart';
 
@@ -12,85 +15,96 @@ class ListAllFootbal extends StatefulWidget {
   State<ListAllFootbal> createState() => _ListAllFootbalState();
 }
 
-class _ListAllFootbalState extends State<ListAllFootbal> {
-  PremiereLeagueModel? premiereLeagueModel;
-  bool isloaded = true;
-
-  void getAllListPL() async {
-    setState(() {
-      isloaded = false;
-    });
-    final res = await http.get(
-      Uri.parse(
-          "https://www.thesportsdb.com/api/v1/json/2/search_all_teams.php?l=English%20Premier%20League"),
-    );
-    print("status code " + res.statusCode.toString());
-    premiereLeagueModel =
-        PremiereLeagueModel.fromJson(json.decode(res.body.toString()));
-    print("team 0 : " + premiereLeagueModel!.teams![0].strTeam.toString());
-    setState(() {
-      isloaded = true;
-    });
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getAllListPL();
-  }
+class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProviderStateMixin  {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xff16213E),
-        title: Text("List Premiere League", style: TextStyle(color: Colors.white60),),
-      ),
-      body: Center(
-        child: Container(
-          child: isloaded
-              ? ListView.builder(
-              itemCount: premiereLeagueModel!.teams!.length,
-              itemBuilder: (BuildContext context, int index) {
-                String name = premiereLeagueModel!
-                    .teams![index].strTeam
-                    .toString();
-                String stadium = premiereLeagueModel!
-                    .teams![index].strStadium
-                    .toString();
-                return InkWell(
-                  onTap: () {
-                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                     return Detail(teams: premiereLeagueModel!.teams![index],);
-                   },));
-                  },
-                  child: Card(
-                    child: Container(
-                      margin: EdgeInsets.all(15),
-                      child: Row(
+      body: Column(
+      children: [
+        Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            Container(
+              margin: EdgeInsets.only(top: 20),
+              width: double.infinity,
+              height: 250,
+              child: FittedBox(
+                child: Image.asset("assets/banner-listView.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 30),
+                  child: Row(
+                    children: [
+                      Image.asset("assets/logo-removebg-preview.png", scale: 4,),
+                      Column(
                         children: [
-                          Container(
-                              margin: EdgeInsets.only(right: 20),
-                              width: 40,
-                              height: 40,
-                              child: Image.network(premiereLeagueModel!.teams![index].strTeamBadge.toString())),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(name),
-                              Text(stadium),
-                            ],
-                          )
+                          Text(
+                            "Premier League",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25.0,
+                            ),
+                          ),
+                          Text(
+                            "Club",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25.0,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                );
-              })
-              : CircularProgressIndicator(),
+                ),
+              ],
+            )
+          ],
         ),
-      ),
+        Expanded(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                DefaultTabController(
+                    length: 2, // length of tabs
+                    initialIndex: 0,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
+                      Container(
+                        child: TabBar(
+                          indicatorColor: Colors.green,
+                          labelColor: Colors.green,
+                          unselectedLabelColor: Colors.black,
+                          tabs: [
+                            Tab(text: 'Club'),
+                            Tab(text: 'Klasemen'),
+                          ],
+                        ),
+                      ),
+                      Container(
+                          height: 538.70, //height of TabBarView
+                          child: TabBarView(children: <Widget>[
+                           ClubList(),
+                            Container(
+                              child: Center(
+                                child: Text('Display Tab Klasemen', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ])
+                      )
+                    ])
+                ),
+              ]),
+            ),
+        ),
+      ],
+    ),
     );
   }
 }
