@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart'as http;
-import 'package:listviewflutter/ClubList.dart';
-import 'package:listviewflutter/DetailFootBall.dart';
+import 'package:listviewflutter/Api/ClubList.dart';
+import 'package:listviewflutter/Api/DetailFootBall.dart';
+import 'package:listviewflutter/Api/KlasemenList.dart';
 import 'package:listviewflutter/PremiereLeagueModel.dart';
 
 
@@ -77,7 +78,10 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
                     initialIndex: 0,
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
                       Container(
-                        child: TabBar(
+                        color: Color(0xff3F1052),
+                        ),
+                        TabBar(
+                          //backgroundColor: Colors.blue
                           indicatorColor: Colors.green,
                           labelColor: Colors.green,
                           unselectedLabelColor: Colors.black,
@@ -86,16 +90,11 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
                             Tab(text: 'Klasemen'),
                           ],
                         ),
-                      ),
                       Container(
-                          height: 538.70, //height of TabBarView
+                          height: 478.60, //height of TabBarView
                           child: TabBarView(children: <Widget>[
                            ClubList(),
-                            Container(
-                              child: Center(
-                                child: Text('Display Tab Klasemen', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                              ),
-                            ),
+                            ListKlasemenFootball(),
                           ])
                       )
                     ])

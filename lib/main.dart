@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:listviewflutter/ListAllFootball.dart';
+import 'package:listviewflutter/Api/KlasemenList.dart';
+import 'package:listviewflutter/Api/TabsList.dart';
 import 'package:listviewflutter/SplashScreen.dart';
 
 void main() {

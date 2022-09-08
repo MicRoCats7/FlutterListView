@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:listviewflutter/Api/DetailFootBall.dart';
 import 'package:listviewflutter/PremiereLeagueModel.dart';
 import 'package:http/http.dart' as http;
 
@@ -48,6 +49,7 @@ class _ClubListState extends State<ClubList> {
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                   onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Detail(teams: premiereLeagueModel!.teams![index])));
                   },
                   child: Card(
                     color: Color(0xFF353535),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ListAllFootball.dart';
+import 'TabsList.dart';
 
 class homePage extends StatefulWidget {
   const homePage({Key? key}) : super(key: key);
@@ -60,9 +60,7 @@ class _homePageState extends State<homePage> {
                 margin: const EdgeInsets.only(top: 50),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return ListAllFootbal();
-                    },));
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ListAllFootbal()), (route) => false);
                   },
                   child: const Text("Mulai", style: TextStyle(fontWeight: FontWeight.bold),),
                   style: ElevatedButton.styleFrom(

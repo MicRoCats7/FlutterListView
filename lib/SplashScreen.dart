@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:listviewflutter/ListAllFootball.dart';
-import 'package:listviewflutter/homePage.dart';
+import 'package:listviewflutter/Api/TabsList.dart';
+import 'package:listviewflutter/Api/homePage.dart';
 
 
 class SplashScreen extends StatefulWidget {
