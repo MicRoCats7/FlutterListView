@@ -21,7 +21,7 @@ class _ClubListState extends State<ClubList> {
     setState(() {
       isLoading = false;
     });
-    final res = await http.get(Uri.parse("https://www.thesportsdb.com/api/v1/json/2/search_all_teams.php?l=English%20Premier%20League"));
+    final res = await http.get(Uri.parse("https://www.thesportsdb.com/api/v1/json/2/search_all_teams.php?l=English%20Premier%20League`"));
     print("Response status: ${res.statusCode}");
     premiereLeagueModel = PremiereLeagueModel.fromJson(json.decode(res.body.toString()));
     print("team 0 : " + premiereLeagueModel!.teams![0].strTeam.toString());

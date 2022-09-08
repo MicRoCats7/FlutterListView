@@ -18,6 +18,28 @@ class ListAllFootbal extends StatefulWidget {
 
 class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProviderStateMixin  {
 
+  PremiereLeagueModel? premiereLeagueModel;
+  bool isLoading = true;
+
+  void getAllListSpanyol() async {
+    setState(() {
+      isLoading = false;
+    });
+    final res = await http.get(Uri.parse("https://www.thesportsdb.com/api/v1/json/2/search_all_teams.php?l=English%20Premier%20League"));
+    print("Response status: ${res.statusCode}");
+    premiereLeagueModel = PremiereLeagueModel.fromJson(json.decode(res.body.toString()));
+    print("team 0 : " + premiereLeagueModel!.teams![0].strTeam.toString());
+    setState(() {
+      isLoading = true;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAllListSpanyol();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,36 +93,58 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
         ),
         Expanded(
           child: Container(
-            child: Column(
-              children: <Widget>[
-                DefaultTabController(
-                    length: 2, // length of tabs
-                    initialIndex: 0,
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
-                      Container(
-                        color: Color(0xff3F1052),
-                        ),
-                        TabBar(
-                          //backgroundColor: Colors.blue
-                          indicatorColor: Colors.green,
-                          labelColor: Colors.green,
-                          unselectedLabelColor: Colors.black,
-                          tabs: [
-                            Tab(text: 'Club'),
-                            Tab(text: 'Klasemen'),
-                          ],
-                        ),
-                      Container(
-                          height: 478.60, //height of TabBarView
-                          child: TabBarView(children: <Widget>[
-                           ClubList(),
-                            ListKlasemenFootball(),
-                          ])
-                      )
-                    ])
-                ),
-              ]),
-            ),
+            color: Color(0XFF3f1052),
+            padding: EdgeInsets.only(top: 0),
+            child: Card(
+              margin: EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
+              color: Color(0XFF3f1052),
+              child: Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(top: 0),
+                      itemCount: premiereLeagueModel!.teams!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        String name = premiereLeagueModel!
+                            .teams![index].strTeam
+                            .toString();
+                        String stadium = premiereLeagueModel!
+                            .teams![index].strStadium
+                            .toString();
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                              return Detail(teams: premiereLeagueModel!.teams![index],);
+                            },));
+                          },
+                          child: Card(
+                            margin: EdgeInsets.only(top: 15, left: 15, right: 15),
+                            child: Container(
+                              margin: EdgeInsets.all(15),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                      margin: EdgeInsets.only(right: 20),
+                                      width: 40,
+                                      height: 40,
+                                      child: Image.network(premiereLeagueModel!.teams![index].strTeamBadge.toString())),
+                                  Container(
+                                    child: Text(name, style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15.0,
+                                    ),),
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.arrow_forward, size: 17,color: Colors.black,),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+              ),),
+          ),
         ),
       ],
     ),
