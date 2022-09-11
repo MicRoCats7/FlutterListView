@@ -45,7 +45,7 @@ class _DetailState extends State<Detail> {
           iconTheme: IconThemeData(
             color: Colors.white, //change your color here
           ),
-            backgroundColor: Color(0xff16213E),
+            backgroundColor: Color(0XFF3f1052),
           title: Text("Detail Club",style: TextStyle(color: Colors.white)),),
     body: SingleChildScrollView(
     child: Container(
@@ -100,7 +100,7 @@ class _DetailState extends State<Detail> {
     style: TextStyle(
     fontWeight:
     FontWeight.bold,
-    fontSize: 22),
+    fontSize: 20),
     ),
     ],
     ),

@@ -43,7 +43,7 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: isLoading? Column(
       children: [
         Stack(
           alignment: AlignmentDirectional.center,
@@ -147,7 +147,7 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
           ),
         ),
       ],
-    ),
+    ): Center(child: CircularProgressIndicator()),
     );
   }
 }

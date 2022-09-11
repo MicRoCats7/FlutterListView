@@ -14,6 +14,7 @@ class ClubList extends StatefulWidget {
 
 class _ClubListState extends State<ClubList> {
 
+
   PremiereLeagueModel? premiereLeagueModel;
   bool isLoading = true;
 
@@ -39,11 +40,11 @@ class _ClubListState extends State<ClubList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading ? Scaffold(
       backgroundColor: Color(0xFF222222),
       body: Center(
-        child: Container(
-          child: isLoading ? ListView.builder(
+        child: isLoading? Container(
+          child: ListView.builder(
             padding: EdgeInsets.all(10),
             itemCount: premiereLeagueModel!.teams!.length,
             itemBuilder: (BuildContext context, int index) {
@@ -59,13 +60,19 @@ class _ClubListState extends State<ClubList> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Image.network(premiereLeagueModel!.teams![index].strTeamBadge.toString(), width: 50, height: 50,),
+                          Center(
+                            child : FadeInImage.assetNetwork(
+                              placeholder:  'assets/premierleague.png',
+                              image: premiereLeagueModel!.teams![index].strTeamBadge.toString(), width: 50, height: 50,
+                            ),
+                          ),
+                          // Image.network(premiereLeagueModel!.teams![index].strTeamBadge.toString() ?? "", width: 50, height: 50,),
                           Container(
                             margin: EdgeInsets.only(left: 10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(premiereLeagueModel!.teams![index].strTeam.toString(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                                Text(premiereLeagueModel!.teams![index].strTeam.toString() ?? "", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                               ],
                             ),
                           ),
@@ -75,10 +82,10 @@ class _ClubListState extends State<ClubList> {
                   )
               );
             },
-          ) : CircularProgressIndicator(),
-        ),
+          ),
+        ): CircularProgressIndicator(),
       ),
-    );
+    ): CircularProgressIndicator();
   }
 
 }
