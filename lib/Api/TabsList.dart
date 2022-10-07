@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart'as http;
 import 'package:listviewflutter/Api/ClubList.dart';
 import 'package:listviewflutter/Api/DetailFootBall.dart';
+import 'package:listviewflutter/Api/Favorite.dart';
 import 'package:listviewflutter/Api/KlasemenList.dart';
 import 'package:listviewflutter/PremiereLeagueModel.dart';
 
@@ -43,13 +44,22 @@ class _ListAllFootbalState extends State<ListAllFootbal> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF3F1052),
+        title: Text("Premier League", style: TextStyle(color: Colors.white),),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => FavoritePremier()),);
+          }, icon: Icon(Icons.favorite, color: Colors.red,),),
+        ],
+      ),
       body: isLoading? Column(
       children: [
         Stack(
           alignment: AlignmentDirectional.center,
           children: [
             Container(
-              margin: EdgeInsets.only(top: 20),
+              margin: EdgeInsets.only(top: 0),
               width: double.infinity,
               height: 250,
               child: FittedBox(

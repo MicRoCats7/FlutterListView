@@ -1,35 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:listviewflutter/PremiereLeagueModel.dart';
 import 'package:readmore/readmore.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart';
+import '../PremiereLeagueModel.dart';
 
 class Detail extends StatefulWidget {
-  Detail({Key? key, this.teams }) : super(key: key);
-  Teams? teams;
+  Detail({Key? key, required this.teams}) : super(key: key);
+  Teams teams;
 
   @override
   State<Detail> createState() => _DetailState();
 }
 
-Widget textView(String name, Color colors){
+Widget textView(String name) {
   return Container(
-    child: Text(name, style: TextStyle(color: colors),),
+    child: Text(
+      name,
+      style: TextStyle(color: Colors.black),
+    ),
   );
 }
 
 class _DetailState extends State<Detail> {
+  bool isFavorit = false;
+  var database;
 
-  bool isEnglish = true;
-  bool isRusia = true;
-  bool isFrancis = true;
-
-  bool isEnglishdesc = true;
-  bool isRusiadesc = true;
-  bool isFrancisdesc = true;
-
-  // Initial Selected Value
   String dropdownvalue = 'English';
+  String? description;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    description = widget.teams.strDescriptionEN;
+    initDb();
+  }
 
   // List of items in our dropdown menu
   var items = [
@@ -38,401 +44,412 @@ class _DetailState extends State<Detail> {
     'Francis',
   ];
 
+  Future initDb() async {
+    database = openDatabase(
+      join(await getDatabasesPath(), 'teams_database.db'),
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE teams(idTeam TEXT, strTeam TEXT, Logo TEXT , League TEXT , Banner TEXT , Stadium TEXT , Stadium1 TEXT , Rusia TEXT , English TEXT , Francis TEXT , TeamShort TEXT , Country TEXT , intFormedYear TEXT , StadiumLocation TEXT, StadiumCapacit TEXT , StadiumDescription TEXT)',
+        );
+      },
+      version: 1,
+    );
+    isFavorit = await read(widget.teams.idTeam);
+    setState(() {});
+  }
+
+//Memasukkan data dari api ke database
+  Future<void> insertApi(Teams teams) async {
+    print("click");
+    final db = await database;
+    await db.insert(
+      'teams',
+      teams.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    setState(() {
+      isFavorit = true;
+    });
+  }
+
+  //read
+  Future<bool> read(String? id) async {
+    final Database db = await database;
+    final data =
+    await db.query('teams', where: "idTeam = ?", whereArgs: [id]);
+    if (data.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //deleted
+  Future<void> delete(Teams? teams) async {
+    final db = await database;
+    await db.delete(
+      'teams',
+      where: "idTeam = ?",
+      whereArgs: [teams!.idTeam],
+    );
+    setState(() {
+      isFavorit = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color.fromARGB(255, 235, 233, 233),
         appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.white, //change your color here
+          actions: [
+            IconButton(
+                onPressed: () {
+                  isFavorit ? delete(widget.teams) : insertApi(widget.teams);
+                },
+                icon: isFavorit
+                    ? Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                )
+                    : Icon(
+                  Icons.favorite_border,
+                  color: Colors.red,
+                )),
+          ],
+          backgroundColor: Color(0xFF3F1052),
+          centerTitle: true,
+          leading: GestureDetector(
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
           ),
-            backgroundColor: Color(0XFF3f1052),
-          title: Text("Detail Club",style: TextStyle(color: Colors.white)),),
-    body: SingleChildScrollView(
-    child: Container(
-    margin: EdgeInsets.all(15),
-    child: Column(
-    children: [
-    ClipRRect(
-    borderRadius: BorderRadius.circular(10),
-    child: FadeInImage.assetNetwork(
-    placeholder: "assets/premierlgbanner.jpg",
-    image: widget.teams!.strTeamBanner.toString(),
-    width: 400,
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.only(top: 20),
-    child: SizedBox(
-    width: 400,
-    child: Card(
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    ),
-    color: Colors.white,
-    child: Padding(
-    padding: const EdgeInsets.only(
-    left: 20, top: 20, bottom: 20),
-    child: Column(
-    children: [
-    Row(
-    children: [
-    FadeInImage.assetNetwork(
-    placeholder: "assets/premierleague.png",
-    image: widget.teams!.strTeamBadge.toString(),
-    width: 80,
-    ),
-    Padding(
-    padding: const EdgeInsets.only(left: 20),
-    child: Column(
-    children: [
-    SizedBox(
-    width: 200,
-    child: Column(
-    children: [
-    Padding(
-    padding: const EdgeInsets.only(
-    bottom: 3),
-    child: Row(
-    children: [
-    Text(
-    widget.teams!.strTeam
-        .toString(),
-    style: TextStyle(
-    fontWeight:
-    FontWeight.bold,
-    fontSize: 20),
-    ),
-    ],
-    ),
-    ),
-    Row(
-    children: [
-    Text(widget.teams!.strTeamShort
-        .toString()),
-    ],
-    ),
-    Padding(
-    padding: const EdgeInsets.only(
-    top: 3, bottom: 3),
-    child: Row(
-    children: [
-    Text("IdTeam : " +
-    widget.teams!.idTeam
-        .toString()),
-    ],
-    ),
-    ),
-    Row(
-    children: [
-    Text("Country : " +
-    widget.teams!.strCountry
-        .toString()),
-    ],
-    ),
-    Padding(
-    padding:
-    const EdgeInsets.only(top: 3),
-    child: Row(
-    children: [
-    Text("Year Formed : " +
-    widget.teams!.intFormedYear
-        .toString()),
-    ],
-    ),
-    )
-    ],
-    ),
-    )
-    ],
-    ),
-    ),
-    ],
-    ),
-    Padding(
-    padding: const EdgeInsets.only(top: 5, bottom: 5),
-    child: Row(
-    children: [
-    Text(
-    "Description : ",
-    style:
-    TextStyle(fontWeight: FontWeight.bold),
-    ),
-    DropdownButton(
-    // Initial Value
-    value: dropdownvalue,
-
-    // Down Arrow Icon
-    icon: const Icon(Icons.keyboard_arrow_down),
-
-    // Array list of items
-    items: items.map((String items) {
-    return DropdownMenuItem(
-    value: items,
-    child: Text(
-    items,
-    style: TextStyle(fontSize: 15),
-    ),
-    );
-    }).toList(),
-    // After selecting the desired option,it will
-    // change button value to selected value
-    onChanged: (String? newValue) {
-    setState(() {
-    // Changing the value of dropdown
-    dropdownvalue = newValue!;
-    if (dropdownvalue == "English") {
-    isEnglishdesc = true;
-    isRusiadesc = false;
-    isFrancisdesc = false;
-    } else if (dropdownvalue == "Rusia") {
-    isEnglishdesc = false;
-    isRusiadesc = true;
-    isFrancisdesc = false;
-    } else if (dropdownvalue == "Francis") {
-    isFrancisdesc = true;
-    isEnglishdesc = false;
-    isRusiadesc = false;
-    }
-    });
-    },
-    ),
-    ],
-    ),
-    ),
-    Row(
-    children: [
-    isEnglish
-    ? Container(
-    width: 300,
-    child: ReadMoreText(
-    isEnglishdesc
-    ? widget.teams!.strDescriptionEN
-        .toString()
-        : isRusiadesc
-    ? widget
-        .teams!.strDescriptionRU
-        .toString()
-        : isFrancis
-    ? widget.teams!
-        .strDescriptionFR
-        .toString()
-        : "",
-    trimLines: 2,
-    trimCollapsedText: 'Show more',
-    trimExpandedText: 'Show less',
-    moreStyle: TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-    color: Colors.blue),
-    lessStyle: TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-    color: Colors.blue),
-    ))
-        : Container()
-    ],
-    )
-    ],
-    ),
-    ),
-    ),
-    ),
-    ),
-    Card(
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    ),
-    color: Colors.white,
-    child: Padding(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-    children: [
-    ClipRRect(
-    borderRadius: BorderRadius.circular(10),
-    child: FadeInImage.assetNetwork(
-    placeholder: "assets/premierleague.png",
-    image: widget.teams!.strStadiumThumb.toString(),
-    width: 400,
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.only(top: 15),
-    child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-    Text(
-    widget.teams!.strStadium.toString(),
-    style: TextStyle(
-    fontWeight: FontWeight.bold, fontSize: 20),
-    ),
-    ],
-    ),
-    ),
-    Container(
-    child: Column(
-    children: [
-    Padding(
-    padding:
-    const EdgeInsets.only(bottom: 5, top: 5),
-    child: Row(
-    children: [
-    Text(
-    "Location : ",
-    style: TextStyle(
-    fontWeight: FontWeight.bold),
-    ),
-    Container(
-    width: 235,
-    child: Text(widget
-        .teams!.strStadiumLocation
-        .toString()),
-    )
-    ],
-    ),
-    ),
-    Row(
-    children: [
-    Text(
-    "Capacity : ",
-    style:
-    TextStyle(fontWeight: FontWeight.bold),
-    ),
-    Text(widget.teams!.intStadiumCapacity
-        .toString())
-    ],
-    ),
-    Padding(
-    padding:
-    const EdgeInsets.only(top: 5, bottom: 5),
-    child: Row(
-    children: [
-    Text(
-    "Description : ",
-    style: TextStyle(
-    fontWeight: FontWeight.bold),
-    ),
-    ],
-    ),
-    ),
-    Row(
-    children: [
-    Container(
-    width: 300,
-    child: ReadMoreText(
-    widget.teams!.strStadiumDescription
-        .toString(),
-    trimLines: 2,
-    trimCollapsedText: 'Show more',
-    trimExpandedText: 'Show less',
-    moreStyle: TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-    color: Colors.blue),
-    lessStyle: TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-    color: Colors.blue),
-    ))
-    ],
-    )
-    ],
-    ),
-    )
-    ],
-    ),
-    ),
-    ),
-    Card(
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    ),
-    color: Colors.white,
-    child: Padding(
-    padding: const EdgeInsets.all(15),
-    child: Column(
-    children: [
-    Row(
-    children: [
-    Text(
-    "Sosial Media : ",
-    style: TextStyle(fontWeight: FontWeight.bold),
-    ),
-    ],
-    ),
-    Container(
-    margin: EdgeInsets.only(top: 16),
-    child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-    InkWell(
-    onTap: () async {
-    await launchUrl(Uri.parse("https://" +
-    widget.teams!.strTwitter.toString()));
-    },
-    child: Container(
-    margin: EdgeInsets.only(left: 5),
-    width: 30,
-    height: 30,
-    child: Image(
-    image:
-    AssetImage("assets/twitter.png")),
-    ),
-    ),
-    InkWell(
-    onTap: () async {
-    await launchUrl(Uri.parse("https://" +
-    widget.teams!.strYoutube.toString()));
-    },
-    child: Container(
-    margin: EdgeInsets.only(left: 16),
-    width: 30,
-    height: 30,
-    child: Image(
-    image: AssetImage("assets/youtube.png"),
-    ),
-    ),
-    ),
-    InkWell(
-    onTap: () async {
-    await launchUrl(Uri.parse("https://" +
-    widget.teams!.strInstagram.toString()));
-    },
-    child: Container(
-    margin: EdgeInsets.only(left: 16),
-    width: 30,
-    height: 30,
-    child: Image(
-    image: AssetImage(
-    "assets/instagram.png")),
-    ),
-    ),
-    InkWell(
-    onTap: () async {
-    await launchUrl(Uri.parse("https://" +
-    widget.teams!.strFacebook.toString()));
-    },
-    child: Container(
-    margin: EdgeInsets.only(left: 16),
-    width: 30,
-    height: 30,
-    child: Image(
-    image:
-    AssetImage("assets/facebook.png"),
-    ),
-    ),
-    ),
-    ],
-    ),
-    ),
-    ],
-    ),
-    ),
-    )
-    ],
-    ),
-    ),
-
-    ),
-    );
+          elevation: 0,
+          title: Text(
+            widget.teams.strTeam.toString(),
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: FadeInImage.assetNetwork(
+                    placeholder: "Image/Loading.gif",
+                    image: widget.teams.strTeamBanner.toString(),
+                    width: 400,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SizedBox(
+                    width: 400,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                FadeInImage.assetNetwork(
+                                  placeholder: "Image/Loading.gif",
+                                  image: widget.teams.strTeamBadge.toString(),
+                                  width: 80,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 200,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              widget.teams.strTeam.toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 22),
+                                            ),
+                                            SizedBox(height: 3),
+                                            Text(widget.teams.strTeamShort
+                                                .toString()),
+                                            SizedBox(height: 3),
+                                            Text("IdTeam : " +
+                                                widget.teams.idTeam.toString()),
+                                            SizedBox(height: 3),
+                                            Text("Country : " +
+                                                widget.teams.strCountry
+                                                    .toString()),
+                                            SizedBox(height: 3),
+                                            Text("Year Formed : " +
+                                                widget.teams.intFormedYear
+                                                    .toString())
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding:
+                              const EdgeInsets.only(top: 16, bottom: 3),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Description : ",
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  DropdownButton(
+                                    value: dropdownvalue,
+                                    icon: const Icon(Icons.keyboard_arrow_down),
+                                    items: items.map((String items) {
+                                      return DropdownMenuItem(
+                                        value: items,
+                                        child: Text(
+                                          items,
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        // Changing the value of dropdown
+                                        dropdownvalue = newValue!;
+                                        if (dropdownvalue == "English") {
+                                          description = widget
+                                              .teams.strDescriptionEN ??
+                                              "No description for this language";
+                                        } else if (dropdownvalue == "Rusia") {
+                                          description = widget
+                                              .teams.strDescriptionRU ??
+                                              "No description for this language";
+                                        } else if (dropdownvalue == "Francis") {
+                                          description = widget
+                                              .teams.strDescriptionFR ??
+                                              "No description for this language";
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                                width: 300,
+                                child: ReadMoreText(
+                                  description.toString(),
+                                  trimLines: 2,
+                                  trimCollapsedText: 'Show more',
+                                  trimExpandedText: 'Show less',
+                                  moreStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue),
+                                  lessStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue),
+                                ))
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: FadeInImage.assetNetwork(
+                            placeholder: "Image/Loading.gif",
+                            image: widget.teams.strStadiumThumb.toString(),
+                            width: 400,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.teams.strStadium.toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "Location : ",
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Container(
+                                    width: 235,
+                                    child: Text(widget.teams.strStadiumLocation
+                                        .toString()),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  Text(
+                                    "Capacity : ",
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(widget.teams.intStadiumCapacity
+                                      .toString())
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                "Description : ",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                  width: 300,
+                                  child: ReadMoreText(
+                                    widget.teams.strStadiumDescription
+                                        .toString(),
+                                    trimLines: 2,
+                                    trimCollapsedText: 'Show more',
+                                    trimExpandedText: 'Show less',
+                                    moreStyle: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue),
+                                    lessStyle: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue),
+                                  ))
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Sosial Media : ",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () async {
+                                  await launchUrl(Uri.parse("https://" +
+                                      widget.teams.strTwitter.toString()));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 5),
+                                  width: 30,
+                                  height: 30,
+                                  child: Image(
+                                      image:
+                                      AssetImage("Image/Logo/twitter.png")),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await launchUrl(Uri.parse("https://" +
+                                      widget.teams.strYoutube.toString()));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  width: 30,
+                                  height: 30,
+                                  child: Image(
+                                    image: AssetImage("Image/Logo/YT.png"),
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await launchUrl(Uri.parse("https://" +
+                                      widget.teams.strInstagram.toString()));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  width: 30,
+                                  height: 30,
+                                  child: Image(
+                                      image: AssetImage(
+                                          "Image/Logo/instagram.png")),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await launchUrl(Uri.parse("https://" +
+                                      widget.teams.strFacebook.toString()));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  width: 30,
+                                  height: 30,
+                                  child: Image(
+                                    image:
+                                    AssetImage("Image/Logo/facebook.png"),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ));
   }
 }
